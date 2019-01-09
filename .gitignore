@@ -1,5 +1,4 @@
 db.sqlite3
 .idea/
 *.pyc
-_initial.py
-*._initial.py
+migrations/
