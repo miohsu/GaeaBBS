@@ -4,16 +4,16 @@ from django.urls import resolve
 from django.contrib.auth import get_user_model
 from django.test import Client
 
-from .views import home
-from .views import board_topics
-from .views import new_topic
-from .models import Board
-from .models import Topic
-from .models import Post
-from .forms import NewTopicForm
-
+from bbs.views import home
+from bbs.views import board_topics
+from bbs.views import new_topic
+from bbs.models import Board
+from bbs.models import Topic
+from bbs.models import Post
+from bbs.forms import NewTopicForm
 
 User = get_user_model()
+
 
 # Create your tests here.
 
@@ -63,9 +63,9 @@ class BoardTopicsTests(TestCase):
 class NewTopicsTests(TestCase):
 
     def setUp(self):
-        Board.objects.create(name='Django',description='djangoTest')
-        User.objects.create_user(username='john', email='john@163.com',password='123')
-
+        Board.objects.create(name='Django', description='djangoTest')
+        User.objects.create_user(username='john', email='john@163.com', password='123')
+        self.client.login(username='john', password='123')
 
     def test_new_topic_view_success_status_code(self):
         url = reverse(new_topic, kwargs={'pk': 1})
@@ -102,24 +102,24 @@ class NewTopicsTests(TestCase):
             'subject': 'Test tile',
             'message': 'Lorem ipsum dolor sit amet'
         }
-        response = self.client.post(url,data)
+        response = self.client.post(url, data)
         self.assertTrue(Topic.objects.exists())
         self.assertTrue(Post.objects.exists())
 
     def test_new_topic_invalid_post_data(self):
-        url = reverse(new_topic, kwargs={'pk':1})
-        response = self.client.post(url,{})
+        url = reverse(new_topic, kwargs={'pk': 1})
+        response = self.client.post(url, {})
         form = response.context.get('form')
         self.assertTrue(form.errors)
         self.assertEqual(response.status_code, 200)
 
     def test_new_topic_invalid_post_data_empty_fields(self):
-        url = reverse(new_topic, kwargs={'pk':1})
+        url = reverse(new_topic, kwargs={'pk': 1})
         data = {
             'subject': '',
             'message': ''
         }
-        response = self.client.post(url,data)
+        response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Topic.objects.exists())
         self.assertFalse(Post.objects.exists())
@@ -129,4 +129,3 @@ class NewTopicsTests(TestCase):
         response = self.client.get(url)
         form = response.context.get('form')
         self.assertIsInstance(form, NewTopicForm)
-
